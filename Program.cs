@@ -8,11 +8,12 @@ namespace DiscordBot
 {
     class Program
     {
+        private static Config config;
         private static DiscordClient client;
         private static CommandsNextExtension commands;
-        static async Task Main(string[] args)
+        static async Task Main()
         {
-            Config config = Config.GetConfig();
+            config = Config.GetConfig();
 
             // Setup client
             DiscordConfiguration discordConfig = new()
@@ -24,6 +25,7 @@ namespace DiscordBot
             };
             client = new(discordConfig);
             client.Ready += ClientReady;
+            client.MessageCreated += ClientMessageCreated;
 
             // Setup commands
             CommandsNextConfiguration commandsConfig = new()
@@ -41,7 +43,21 @@ namespace DiscordBot
             await Task.Delay(-1); // -1 means forever
         }
 
-        private static Task ClientReady(DiscordClient sender, ReadyEventArgs args)
+        private static async Task ClientMessageCreated(DiscordClient sender, MessageCreateEventArgs e)
+        {
+            // Handle swear words
+            string msg = e.Message.Content.ToLower();
+            foreach (var word in config.bannedWords)
+            {
+                if (msg.Contains(word))
+                {
+                    Console.WriteLine($"Detected banned word \"{word}\" used by {e.Author.Username} (Deleted message)");
+                    await e.Message.DeleteAsync();
+                }
+            }
+        }
+
+        private static Task ClientReady(DiscordClient sender, ReadyEventArgs e)
         {
             return Task.CompletedTask;
         }

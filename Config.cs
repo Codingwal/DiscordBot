@@ -6,6 +6,7 @@ namespace DiscordBot
     {
         public string token;
         public string prefix;
+        public string[] bannedWords;
         public static Config GetConfig()
         {
             Config config = new();
@@ -15,6 +16,7 @@ namespace DiscordBot
                 string json = sr.ReadToEnd();
                 JSONConfig data = JsonConvert.DeserializeObject<JSONConfig>(json);
                 config.prefix = data.prefix;
+                config.bannedWords = data.bannedWords;
             }
             using (StreamReader sr = new("config/token.json"))
             {
@@ -30,6 +32,7 @@ namespace DiscordBot
     internal sealed class JSONConfig
     {
         public string prefix;
+        public string[] bannedWords;
     }
     internal sealed class JSONToken
     {
