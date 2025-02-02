@@ -1,9 +1,10 @@
 {
-    "prefix": "/",
-    "bannedWords": [
-        "fuck",
-        "asshole",
-        "cunt",
-        "bitch"
-    ]
+  "prefix": "/",
+  "bannedWords": [
+    "fuck",
+    "asshole",
+    "cunt",
+    "bitch"
+  ],
+  "faq": "Minecraft ist cool"
 }

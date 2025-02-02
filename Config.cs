@@ -5,27 +5,31 @@ namespace DiscordBot
     internal class Config
     {
         public string token;
-        public string prefix;
-        public string[] bannedWords;
+        public JSONConfig config;
         public static Config GetConfig()
         {
-            Config config = new();
+            Config c = new();
 
-            using (StreamReader sr = new("config/config.json"))
+            using (StreamReader r = new("config/config.json"))
             {
-                string json = sr.ReadToEnd();
-                JSONConfig data = JsonConvert.DeserializeObject<JSONConfig>(json);
-                config.prefix = data.prefix;
-                config.bannedWords = data.bannedWords;
+                string json = r.ReadToEnd();
+                c.config = JsonConvert.DeserializeObject<JSONConfig>(json);
             }
-            using (StreamReader sr = new("config/token.json"))
+            using (StreamReader r = new("config/token.json"))
             {
-                string json = sr.ReadToEnd();
-                JSONToken data = JsonConvert.DeserializeObject<JSONToken>(json);
-                config.token = data.token;
+                string json = r.ReadToEnd();
+                c.token = JsonConvert.DeserializeObject<JSONToken>(json).token;
             }
 
-            return config;
+            return c;
+        }
+        public void SaveConfig()
+        {
+            using (StreamWriter w = new("config/config.json"))
+            {
+                string json = JsonConvert.SerializeObject(config, Formatting.Indented);
+                w.Write(json);
+            } 
         }
     }
 
@@ -33,6 +37,7 @@ namespace DiscordBot
     {
         public string prefix;
         public string[] bannedWords;
+        public string faq;
     }
     internal sealed class JSONToken
     {
