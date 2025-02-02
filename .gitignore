@@ -1,0 +1,6 @@
+bin
+obj
+*.exe
+*.sln
+*.csproj
+config/token.json

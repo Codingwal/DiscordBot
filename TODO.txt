@@ -1,0 +1,9 @@
+- announcements / regelnachrichten
+- command faq
+- verwarnen, muten, ... -> Nachricht an user
+
+- auf dms antworten
+- sticky messages im channel -> (wenn etwas geschrieben wird, die eigene Nachricht löschen und neu posten)
+
+- ticketsystem
+- webinterface für regeln & announcements
