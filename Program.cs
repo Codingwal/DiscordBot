@@ -92,6 +92,16 @@ namespace DiscordBot
 
         private static async Task OnClientMessageCreated(DiscordClient sender, MessageCreateEventArgs e)
         {
+            if (e.Author.IsBot)
+                return;
+
+            // Handle private messages
+            if (e.Guild == null)
+            {
+                await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(config.config.privateMessageResponse));
+                return;
+            }
+
             // Handle swear words
             string msg = e.Message.Content.ToLower();
             foreach (var word in config.config.bannedWords)

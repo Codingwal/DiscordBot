@@ -38,6 +38,7 @@ namespace DiscordBot
         public string prefix;
         public string[] bannedWords;
         public string faq;
+        public string privateMessageResponse;
     }
     internal sealed class JSONToken
     {
