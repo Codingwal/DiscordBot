@@ -1,14 +1,14 @@
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.Attributes;
 
 namespace DiscordBot.Commands
 {
-    public class UserCommands : BaseCommandModule
+    public class UserCommands : ApplicationCommandModule
     {
-        [Command("faq")]
-        [Cooldown(2, 120, CooldownBucketType.User)] // 120s = 2min
-        public async Task Faq(CommandContext ctx)
+        [SlashCommand("faq", "Prints the up-to-date version of the FAQ")]
+        [SlashCooldown(2, 2 * 60, SlashCooldownBucketType.User)]
+        public async Task Faq(InteractionContext ctx)
         {
             var msg = new DiscordEmbedBuilder
             {
@@ -16,7 +16,7 @@ namespace DiscordBot.Commands
                 Description = Program.config.config.faq,
                 Color = DiscordColor.Blue,
             };
-            await ctx.Channel.SendMessageAsync(msg);
+            await ctx.CreateResponseAsync(msg);
         }
     }
 }

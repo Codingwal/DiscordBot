@@ -40,11 +40,10 @@ namespace DiscordBot
                 EnableDefaultHelp = false,
             };
             var commands = client.UseCommandsNext(commandsConfig);
-            commands.RegisterCommands<UserCommands>();
-            commands.CommandErrored += OnCommandErrored;
 
             // Setup slash commands
             var slCommands = client.UseSlashCommands();
+            slCommands.RegisterCommands<UserCommands>();
             slCommands.RegisterCommands<AdminCommands>();
 
             // Start the bot and run it until the program gets stopped
@@ -67,26 +66,6 @@ namespace DiscordBot
                     default:
                         throw new();
                 }
-            }
-        }
-
-        private static async Task OnCommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
-        {
-            if (e.Exception is ChecksFailedException exception)
-            {
-                string timeLeft = "";
-                foreach (var check in exception.FailedChecks)
-                {
-                    var cooldown = (CooldownAttribute)check;
-                    timeLeft = cooldown.GetRemainingCooldown(e.Context).ToString(@"hh\:mm\:ss");
-                }
-                var msg = new DiscordEmbedBuilder
-                {
-                    Color = DiscordColor.Red,
-                    Title = "Please wait for the cooldown to end",
-                    Description = $"Time: {timeLeft}"
-                };
-                await e.Context.Channel.SendMessageAsync(msg);
             }
         }
 
