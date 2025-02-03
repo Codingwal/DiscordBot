@@ -29,7 +29,7 @@ namespace DiscordBot
             {
                 string json = JsonConvert.SerializeObject(config, Formatting.Indented);
                 w.Write(json);
-            } 
+            }
         }
     }
 

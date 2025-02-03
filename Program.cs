@@ -5,15 +5,13 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Newtonsoft.Json;
+using DSharpPlus.SlashCommands;
 
 namespace DiscordBot
 {
     class Program
     {
         public static Config config;
-        private static DiscordClient client;
-        private static CommandsNextExtension commands;
         static async Task Main()
         {
             config = Config.GetConfig();
@@ -26,9 +24,12 @@ namespace DiscordBot
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
             };
-            client = new(discordConfig);
-            client.Ready += ClientReady;
-            client.MessageCreated += ClientMessageCreated;
+            DiscordClient client = new(discordConfig);
+
+            // Setup event handlers
+            client.Ready += OnClientReady;
+            client.MessageCreated += OnClientMessageCreated;
+            client.ModalSubmitted += OnModalSubmitted;
 
             // Setup commands
             CommandsNextConfiguration commandsConfig = new()
@@ -38,18 +39,35 @@ namespace DiscordBot
                 EnableDms = true,
                 EnableDefaultHelp = false,
             };
-            commands = client.UseCommandsNext(commandsConfig);
+            var commands = client.UseCommandsNext(commandsConfig);
             commands.RegisterCommands<UserCommands>();
-            commands.RegisterCommands<AdminCommands>();
+            commands.CommandErrored += OnCommandErrored;
 
-            commands.CommandErrored += CommandErrored;
+            // Setup slash commands
+            var slCommands = client.UseSlashCommands();
+            slCommands.RegisterCommands<AdminCommands>();
 
             // Start the bot and run it until the program gets stopped
             await client.ConnectAsync();
             await Task.Delay(-1); // -1 means forever
         }
 
-        private static async Task CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
+        private static async Task OnModalSubmitted(DiscordClient sender, ModalSubmitEventArgs e)
+        {
+            if (e.Interaction.Type == InteractionType.ModalSubmit)
+            {
+                switch (e.Interaction.Data.CustomId)
+                {
+                    case "post-modal":
+                        await AdminCommands.OnPostConfirmed(e);
+                        break;
+                    default:
+                        throw new();
+                }
+            }
+        }
+
+        private static async Task OnCommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
         {
             if (e.Exception is ChecksFailedException exception)
             {
@@ -69,7 +87,7 @@ namespace DiscordBot
             }
         }
 
-        private static async Task ClientMessageCreated(DiscordClient sender, MessageCreateEventArgs e)
+        private static async Task OnClientMessageCreated(DiscordClient sender, MessageCreateEventArgs e)
         {
             // Handle swear words
             string msg = e.Message.Content.ToLower();
@@ -83,7 +101,7 @@ namespace DiscordBot
             }
         }
 
-        private static Task ClientReady(DiscordClient sender, ReadyEventArgs e)
+        private static Task OnClientReady(DiscordClient sender, ReadyEventArgs e)
         {
             return Task.CompletedTask;
         }
