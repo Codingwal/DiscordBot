@@ -58,8 +58,11 @@ namespace DiscordBot
             {
                 switch (e.Interaction.Data.CustomId)
                 {
-                    case "post-modal":
+                    case "post":
                         await AdminCommands.OnPostConfirmed(e);
+                        break;
+                    case "setfaq":
+                        await AdminCommands.OnSetFaqConfirmed(e);
                         break;
                     default:
                         throw new();
