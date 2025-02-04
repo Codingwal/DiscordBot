@@ -192,13 +192,6 @@ namespace DiscordBot.Commands
                 await guild.UnbanMemberAsync(pair.userID);
 
                 DiscordUser user = await client.GetUserAsync(pair.userID);
-
-                var dm = await ((DiscordMember)user).CreateDmChannelAsync();
-                await dm.SendMessageAsync(new DiscordEmbedBuilder()
-                    .WithTitle("Ban over")
-                    .WithDescription($"You are no longer banned.")
-                    .WithColor(DiscordColor.Green));
-
                 Console.WriteLine($"Unbanned {user.Username}.");
             }
         }
