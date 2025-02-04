@@ -3,4 +3,4 @@ obj
 *.exe
 *.sln
 *.csproj
-config/token.json
+data/token.json

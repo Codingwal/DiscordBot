@@ -1,0 +1,27 @@
+{
+  "users": {
+    "844528947462144011": {
+      "username": "neonneonneon",
+      "records": [
+        {
+          "punishmentType": 1,
+          "duration": 0,
+          "reason": "spamming",
+          "lastMessages": [
+            "9",
+            "8",
+            "7",
+            "6",
+            "5",
+            "4",
+            "3",
+            "2",
+            "1",
+            "Test",
+            "4"
+          ]
+        }
+      ]
+    }
+  }
+}

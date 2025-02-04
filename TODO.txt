@@ -1,8 +1,5 @@
-- announcements / regelnachrichten
-- command faq
-- verwarnen, muten, ... -> Nachricht an user
+- eigener pre-execution check (RequireChannel) (https://dsharpplus.github.io/DSharpPlus/articles/slash_commands.html)
 
-- auf dms antworten
 - sticky messages im channel -> (wenn etwas geschrieben wird, die eigene Nachricht löschen und neu posten)
 
 - ticketsystem

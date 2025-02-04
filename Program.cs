@@ -11,16 +11,16 @@ namespace DiscordBot
 {
     class Program
     {
-        public static Config config;
+        public static Data data;
         static async Task Main()
         {
-            config = Config.GetConfig();
+            data = Data.GetData();
 
             // Setup client
             DiscordConfiguration discordConfig = new()
             {
                 Intents = DiscordIntents.All,
-                Token = config.token,
+                Token = data.Token,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
             };
@@ -34,7 +34,7 @@ namespace DiscordBot
             // Setup commands
             CommandsNextConfiguration commandsConfig = new()
             {
-                StringPrefixes = new string[] { config.config.prefix },
+                StringPrefixes = new string[] { data.Config.prefix },
                 EnableMentionPrefix = true,
                 EnableDms = true,
                 EnableDefaultHelp = false,
@@ -48,7 +48,12 @@ namespace DiscordBot
 
             // Start the bot and run it until the program gets stopped
             await client.ConnectAsync();
-            await Task.Delay(-1); // -1 means forever
+            while (true)
+            {
+                await Task.Delay(5 * 1000);
+                Console.WriteLine("Saving data");
+                data.SaveData();
+            }
         }
 
         private static async Task OnModalSubmitted(DiscordClient sender, ModalSubmitEventArgs e)
@@ -77,13 +82,13 @@ namespace DiscordBot
             // Handle private messages
             if (e.Guild == null)
             {
-                await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(config.config.privateMessageResponse));
+                await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(data.Config.privateMessageResponse));
                 return;
             }
 
             // Handle swear words
             string msg = e.Message.Content.ToLower();
-            foreach (var word in config.config.bannedWords)
+            foreach (var word in data.Config.bannedWords)
             {
                 if (msg.Contains(word))
                 {
