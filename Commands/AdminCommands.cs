@@ -112,6 +112,7 @@ namespace DiscordBot.Commands
             JSONUserRecord record = new()
             {
                 punishmentType = JSONUserRecord.PunishmentType.Warning,
+                time = DateTime.Now,
                 duration = 0,
                 reason = reason,
             };

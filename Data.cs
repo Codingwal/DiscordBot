@@ -78,6 +78,7 @@ namespace DiscordBot
             Ban
         }
         public PunishmentType punishmentType = PunishmentType.None;
+        public DateTime time;
         public long duration = 0;
         public string reason = "";
         public List<string> lastMessages = new();
