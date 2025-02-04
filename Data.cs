@@ -48,6 +48,7 @@ namespace DiscordBot
     internal sealed class JSONConfig
     {
         public string prefix = "";
+        public int saveDataFrequency = 5;
         public List<string> bannedWords = new();
         public string faq = "";
         public string privateMessageResponse = "";

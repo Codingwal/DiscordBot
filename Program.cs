@@ -50,8 +50,7 @@ namespace DiscordBot
             await client.ConnectAsync();
             while (true)
             {
-                await Task.Delay(5 * 1000);
-                Console.WriteLine("Saving data");
+                await Task.Delay(data.Config.saveDataFrequency * 1000);
                 data.SaveData();
             }
         }

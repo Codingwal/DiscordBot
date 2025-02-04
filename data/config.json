@@ -1,5 +1,6 @@
 {
   "prefix": "/",
+  "saveDataFrequency": 10,
   "bannedWords": [
     "fuck",
     "asshole",
