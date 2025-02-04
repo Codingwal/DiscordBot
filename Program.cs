@@ -46,12 +46,15 @@ namespace DiscordBot
             slCommands.RegisterCommands<UserCommands>();
             slCommands.RegisterCommands<AdminCommands>();
 
+            // Console.WriteLine(client.Intents.HasIntent(DiscordIntents.));
+
             // Start the bot and run it until the program gets stopped
             await client.ConnectAsync();
             while (true)
             {
                 await Task.Delay(data.Config.saveDataFrequency * 1000);
                 data.SaveData();
+                AdminCommands.UpdateBannedUsers(client);
             }
         }
 

@@ -1,3 +1,30 @@
 {
-  
+  "users": {
+    "263020401364303873": {
+      "username": "ardamovic",
+      "records": [
+        {
+          "punishmentType": 1,
+          "time": "2025-02-04T16:06:29.3555033+01:00",
+          "duration": 0,
+          "reason": "why not",
+          "lastMessages": [
+            "https://tenor.com/view/hi-are-you-my-family-just-hatched-cute-wave-gif-16120889",
+            "hello",
+            ""
+          ]
+        },
+        {
+          "punishmentType": 1,
+          "time": "2025-02-04T16:15:17.0047425+01:00",
+          "duration": 0,
+          "reason": "test",
+          "lastMessages": [
+            "",
+            ""
+          ]
+        }
+      ]
+    }
+  }
 }

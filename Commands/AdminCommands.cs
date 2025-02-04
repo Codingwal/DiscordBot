@@ -2,6 +2,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.Attributes;
 
 namespace DiscordBot.Commands
 {
@@ -140,6 +141,66 @@ namespace DiscordBot.Commands
                 users[user.Id].records.Add(record);
             else
                 users.Add(user.Id, new JSONUser() { username = user.Username, records = new() { record } });
+        }
+
+        static PriorityQueue<(ulong, ulong), DateTime> bannedUsers = new(); // <(GuildID, UserID), time>
+        [SlashCommand("tmpban", "Temporarily ban a user")]
+        [SlashRequireBotPermissions(Permissions.BanMembers)]
+        public static async Task TmpBan(InteractionContext ctx,
+           [Option("User", "The user to ban")] DiscordUser user,
+           [Choice("1 minute", 1f / 60f)] [Choice("1 hour", 1)] [Choice("1 day", 24)] [Choice("1 week", 7 * 24)]
+           [Option("Duration", "The duration of the ban")] double duration,
+           [Option("Reason", "The reason for the temporary ban")] string reason)
+        {
+            var dm = await ((DiscordMember)user).CreateDmChannelAsync();
+            await dm.SendMessageAsync(new DiscordEmbedBuilder()
+                .WithTitle("Ban")
+                .WithDescription($"You have been banned because of {reason}.\nYou will be unbanned after {duration} hours.")
+                .WithColor(DiscordColor.Red));
+
+            try
+            {
+                await ctx.Guild.BanMemberAsync(user.Id);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent($"Successfully banned {user.Username} for {duration} hours.").AsEphemeral());
+
+            bannedUsers.Enqueue((ctx.Guild.Id, user.Id), DateTime.Now.AddHours(duration));
+            Console.WriteLine($"Banned {user.Username} for {duration} hours.");
+        }
+        public static async void UpdateBannedUsers(DiscordClient client)
+        {
+            while (true)
+            {
+                if (!bannedUsers.TryPeek(out (ulong guildID, ulong userID) pair, out DateTime time)) // Break if there are no more users
+                    break;
+
+                if (time - DateTime.Now > TimeSpan.Zero) // Break if there is time left
+                {
+                    Console.WriteLine(time - DateTime.Now);
+                    break;
+                }
+
+                bannedUsers.Dequeue();
+
+                // Unban
+                DiscordGuild guild = await client.GetGuildAsync(pair.guildID);
+                await guild.UnbanMemberAsync(pair.userID);
+
+                DiscordUser user = await client.GetUserAsync(pair.userID);
+
+                var dm = await ((DiscordMember)user).CreateDmChannelAsync();
+                await dm.SendMessageAsync(new DiscordEmbedBuilder()
+                    .WithTitle("Ban over")
+                    .WithDescription($"You are no longer banned.")
+                    .WithColor(DiscordColor.Green));
+
+                Console.WriteLine($"Unbanned {user.Username}.");
+            }
         }
     }
 }
