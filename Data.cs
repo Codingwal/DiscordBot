@@ -52,6 +52,7 @@ namespace DiscordBot
         public List<string> bannedWords = new();
         public string faq = "";
         public string privateMessageResponse = "";
+        public string inviteLink = "";
     }
 
     internal sealed class JSONToken

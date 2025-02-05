@@ -206,7 +206,7 @@ namespace DiscordBot.Commands
                 await msg.ModifyAsync(new DiscordMessageBuilder()
                     .WithEmbed(new DiscordEmbedBuilder()
                         .WithTitle("Unban")
-                        .WithDescription("You have been unbanned.")
+                        .WithDescription($"You have been unbanned.\n{Program.data.Config.inviteLink}")
                         .WithColor(DiscordColor.Green)));
             }
         }
