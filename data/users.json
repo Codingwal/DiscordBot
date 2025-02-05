@@ -1,30 +1,18 @@
 {
-  "users": {
-    "263020401364303873": {
-      "username": "ardamovic",
-      "records": [
-        {
-          "punishmentType": 1,
-          "time": "2025-02-04T16:06:29.3555033+01:00",
-          "duration": 0,
-          "reason": "why not",
-          "lastMessages": [
-            "https://tenor.com/view/hi-are-you-my-family-just-hatched-cute-wave-gif-16120889",
-            "hello",
-            ""
-          ]
+  "bannedUsers": {
+    "Count": 1,
+    "Comparer": {},
+    "UnorderedItems": [
+      {
+        "Item1": {
+          "Item1": 1335583901258874923,
+          "Item2": 263020401364303873,
+          "Item3": 1336352180243923004,
+          "Item4": 1336767346907287623
         },
-        {
-          "punishmentType": 1,
-          "time": "2025-02-04T16:15:17.0047425+01:00",
-          "duration": 0,
-          "reason": "test",
-          "lastMessages": [
-            "",
-            ""
-          ]
-        }
-      ]
-    }
-  }
+        "Item2": "2025-02-05T19:36:43.1127445+01:00"
+      }
+    ]
+  },
+  "users": {}
 }

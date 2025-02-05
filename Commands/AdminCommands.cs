@@ -121,7 +121,6 @@ namespace DiscordBot.Commands
                 users.Add(user.Id, new JSONUser() { username = user.Username, records = new() { record } });
         }
 
-        static PriorityQueue<(ulong, ulong, ulong, ulong), DateTime> bannedUsers = new(); // <(GuildID, UserID, ChannelID, MessageID), time>
         [SlashCommand("tmpban", "Temporarily ban a user")]
         [SlashRequireBotPermissions(Permissions.BanMembers)]
         [SlashRequireUserPermissions(Permissions.BanMembers)]
@@ -153,14 +152,14 @@ namespace DiscordBot.Commands
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().WithContent($"Successfully banned {user.Username} for {duration} hours.").AsEphemeral());
 
-            bannedUsers.Enqueue((ctx.Guild.Id, user.Id, dm.Id, msg.Id), DateTime.Now.AddHours(duration));
+            Program.data.Users.bannedUsers.Enqueue((ctx.Guild.Id, user.Id, dm.Id, msg.Id), DateTime.Now.AddHours(duration));
             Console.WriteLine($"Banned {user.Username} for {duration} hours.");
         }
         public static async void UpdateBannedUsers(DiscordClient client)
         {
             while (true)
             {
-                if (!bannedUsers.TryPeek(out (ulong guildID, ulong userID, ulong channelID, ulong msgID) pair, out DateTime time)) // Break if there are no more users
+                if (!Program.data.Users.bannedUsers.TryPeek(out (ulong guildID, ulong userID, ulong channelID, ulong msgID) pair, out DateTime time)) // Break if there are no more users
                     break;
 
                 if (time - DateTime.Now > TimeSpan.Zero) // Break if there is time left
@@ -169,7 +168,7 @@ namespace DiscordBot.Commands
                     break;
                 }
 
-                bannedUsers.Dequeue();
+                Program.data.Users.bannedUsers.Dequeue();
 
                 // Unban
                 DiscordGuild guild = await client.GetGuildAsync(pair.guildID);

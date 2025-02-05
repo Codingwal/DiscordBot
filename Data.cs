@@ -25,7 +25,15 @@ namespace DiscordBot
             using (StreamReader r = new("data/users.json"))
             {
                 string json = r.ReadToEnd();
-                c.Users = JsonConvert.DeserializeObject<JSONUsers>(json);
+                try
+                {
+                    c.Users = JsonConvert.DeserializeObject<JSONUsers>(json);
+                }
+                catch (JsonSerializationException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                Console.WriteLine(c.Users.bannedUsers.Count);
             }
 
             return c;
@@ -62,6 +70,7 @@ namespace DiscordBot
 
     internal sealed class JSONUsers
     {
+        public PriorityQueue<(ulong, ulong, ulong, ulong), DateTime> bannedUsers; // <(GuildID, UserID, ChannelID, MessageID), time>
         public Dictionary<ulong, JSONUser> users = new();
     }
     public class JSONUser
