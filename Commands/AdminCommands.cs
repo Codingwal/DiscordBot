@@ -9,29 +9,11 @@ namespace DiscordBot.Commands
 {
     public class AdminCommands : ApplicationCommandModule
     {
-        // Utility
-        private static async Task<DiscordChannel> GetChannelByName(DiscordGuild guild, string name)
-        {
-            IReadOnlyList<DiscordChannel> channels = await guild.GetChannelsAsync();
-            foreach (var channel in channels)
-            {
-                if (channel.Name == name)
-                    return channel;
-            }
-            return null;
-        }
-
         // setfaq
         [SlashCommand("setfaq", "Update the FAQ")]
+        [RequireChannel("admin-commands")]
         public static async Task SetFaq(InteractionContext ctx)
         {
-            if (ctx.Channel.Name != "admin-commands")
-            {
-                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                    new DiscordInteractionResponseBuilder().WithContent("This command can only be used in the \"admin-commands\" channel.").AsEphemeral());
-                return;
-            }
-
             var modal = new DiscordInteractionResponseBuilder()
                 .WithTitle("Set the faq")
                 .WithCustomId("setfaq")
@@ -52,15 +34,9 @@ namespace DiscordBot.Commands
 
         // post
         [SlashCommand("post", "Use this to post a message into any channel")]
+        [RequireChannel("admin-commands")]
         public static async Task Post(InteractionContext ctx)
         {
-            if (ctx.Channel.Name != "admin-commands")
-            {
-                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                    new DiscordInteractionResponseBuilder().WithContent("This command can only be used in the \"admin-commands\" channel.").AsEphemeral());
-                return;
-            }
-
             var modal = new DiscordInteractionResponseBuilder()
                 .WithTitle("Create a post")
                 .WithCustomId("post")
@@ -76,7 +52,7 @@ namespace DiscordBot.Commands
             string channelName = values["channel"];
             string title = values["title"];
             string content = values["content"];
-            var channel = await GetChannelByName(e.Interaction.Guild, channelName);
+            var channel = await Utility.GetChannelAsync(e.Interaction.Guild, channelName);
             if (channel == null)
             {
                 await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
@@ -95,6 +71,7 @@ namespace DiscordBot.Commands
         }
 
         [SlashCommand("warn", "Warn a user because of bad behaviour")]
+        [SlashRequireUserPermissions(Permissions.KickMembers)]
         public static async Task Warn(InteractionContext ctx,
             [Option("User", "The user to warn")] DiscordUser user,
             [Option("Reason", "The reason for the warning")] string reason)
@@ -147,6 +124,7 @@ namespace DiscordBot.Commands
         static PriorityQueue<(ulong, ulong, ulong, ulong), DateTime> bannedUsers = new(); // <(GuildID, UserID, ChannelID, MessageID), time>
         [SlashCommand("tmpban", "Temporarily ban a user")]
         [SlashRequireBotPermissions(Permissions.BanMembers)]
+        [SlashRequireUserPermissions(Permissions.BanMembers)]
         public static async Task TmpBan(InteractionContext ctx,
            [Option("User", "The user to ban")] DiscordUser user,
            [Choice("30 seconds", 1f / 120f)] [Choice("1 hour", 1)] [Choice("1 day", 24)] [Choice("1 week", 7 * 24)]

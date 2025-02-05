@@ -6,6 +6,7 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.EventArgs;
 
 namespace DiscordBot
 {
@@ -45,6 +46,7 @@ namespace DiscordBot
             var slCommands = client.UseSlashCommands();
             slCommands.RegisterCommands<UserCommands>();
             slCommands.RegisterCommands<AdminCommands>();
+            slCommands.SlashCommandErrored += OnSlashCommandErrored;
 
             // Console.WriteLine(client.Intents.HasIntent(DiscordIntents.));
 
@@ -55,6 +57,19 @@ namespace DiscordBot
                 await Task.Delay(data.Config.saveDataFrequency * 1000);
                 data.SaveData();
                 AdminCommands.UpdateBannedUsers(client);
+            }
+        }
+
+        private static async Task OnSlashCommandErrored(SlashCommandsExtension sender, SlashCommandErrorEventArgs e)
+        {
+            if (e.Exception is SlashExecutionChecksFailedException ex)
+            {
+                foreach (var check in ex.FailedChecks)
+                {
+                    if (check is RequireChannelAttribute)
+                        await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                            new DiscordInteractionResponseBuilder().WithContent("This command can only be used in the \"admin-commands\" channel.").AsEphemeral());
+                }
             }
         }
 
