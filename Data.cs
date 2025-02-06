@@ -79,7 +79,7 @@ namespace DiscordBot
     internal sealed class JSONData
     {
         public string faq = "";
-        public List<(ulong, ulong)> stickyMessages = new(); // <(channelID, msgID)>
+        public Dictionary<ulong, ulong> stickyMessages = new(); // <channelID, msgID>
     }
 
     // users.json

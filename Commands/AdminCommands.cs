@@ -78,6 +78,15 @@ namespace DiscordBot.Commands
                 .WithContent($"{e.Interaction.User.Username} posted something in {channelName}."));
         }
 
+        [SlashCommand("unstick", "Make a currently sticky message an unsticky one")]
+        [RequireUserPermissions(Permissions.ManageChannels)]
+        public static async Task Unstick(InteractionContext ctx)
+        {
+            Program.data.data.stickyMessages.Remove(ctx.Channel.Id);
+            await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent($"Post is no longer sticky").AsEphemeral());
+        }
+
         [SlashCommand("warn", "Warn a user because of bad behaviour")]
         [SlashRequireUserPermissions(Permissions.KickMembers)]
         public static async Task Warn(InteractionContext ctx,

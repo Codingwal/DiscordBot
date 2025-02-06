@@ -70,10 +70,10 @@ namespace DiscordBot
                 string[] tokens = customId.Split('-');
                 ulong channelID = ulong.Parse(tokens[1]);
                 ulong msgID = ulong.Parse(tokens[2]);
-                data.data.stickyMessages.Add((channelID, msgID));
+                data.data.stickyMessages[channelID] = msgID;
 
                 await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                    .WithContent($"Made message sticky."));
+                    .WithContent($"{e.User.Username} made a post sticky."));
             }
         }
 
@@ -134,18 +134,15 @@ namespace DiscordBot
             }
 
             // Handle sticky messages
-            for (int i = 0; i < data.data.stickyMessages.Count; i++)
+            if (data.data.stickyMessages.TryGetValue(e.Channel.Id, out ulong msgId))
             {
-                if (e.Channel.Id != data.data.stickyMessages[i].Item1) // Item1 = channelId
-                    continue;
-
                 try
                 {
-                    var msg = await e.Channel.GetMessageAsync(data.data.stickyMessages[i].Item2); // Item2 = msgId
+                    var msg = await e.Channel.GetMessageAsync(msgId);
                     var embed = new DiscordEmbedBuilder(msg.Embeds[0]);
                     await msg.DeleteAsync();
                     msg = await e.Channel.SendMessageAsync(embed);
-                    data.data.stickyMessages[i] = (e.Channel.Id, msg.Id); // Update msgId
+                    data.data.stickyMessages[e.Channel.Id] = msg.Id; // Update msgId
                 }
                 catch (NotFoundException) { } // Message is probably already being moved
             }
