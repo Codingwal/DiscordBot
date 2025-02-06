@@ -163,10 +163,7 @@ namespace DiscordBot.Commands
                     break;
 
                 if (time - DateTime.Now > TimeSpan.Zero) // Break if there is time left
-                {
-                    Console.WriteLine(time - DateTime.Now);
                     break;
-                }
 
                 Program.data.Users.bannedUsers.Dequeue();
 
@@ -174,6 +171,7 @@ namespace DiscordBot.Commands
                 DiscordGuild guild = await client.GetGuildAsync(info.guildID);
                 await guild.UnbanMemberAsync(info.userID);
 
+                // Log
                 DiscordUser user = await client.GetUserAsync(info.userID);
                 Console.WriteLine($"Unbanned {user.Username}.");
 
