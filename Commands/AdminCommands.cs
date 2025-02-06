@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
@@ -122,11 +123,10 @@ namespace DiscordBot.Commands
         }
 
         [SlashCommand("tmpban", "Temporarily ban a user")]
-        [SlashRequireBotPermissions(Permissions.BanMembers)]
         [SlashRequireUserPermissions(Permissions.BanMembers)]
         public static async Task TmpBan(InteractionContext ctx,
            [Option("User", "The user to ban")] DiscordUser user,
-           [Choice("30 seconds", 1f / 120f)] [Choice("1 hour", 1)] [Choice("1 day", 24)] [Choice("1 week", 7 * 24)]
+           [Choice("1 hour", 1)] [Choice("1 day", 24)] [Choice("1 week", 7 * 24)]
            [Option("Duration", "The duration of the ban")] double duration,
            [Option("Reason", "The reason for the temporary ban")] string reason)
         {
@@ -184,6 +184,25 @@ namespace DiscordBot.Commands
                         .WithDescription($"You have been unbanned.\n{Program.data.Config.inviteLink}")
                         .WithColor(DiscordColor.Green)));
             }
+        }
+
+        [SlashCommand("unban", "Unban a user")]
+        [RequireUserPermissions(Permissions.BanMembers)]
+        public static async void UnbanUser(InteractionContext ctx, [Option("user", "The user to unban")] DiscordUser user)
+        {
+            try
+            {
+                await ctx.Guild.UnbanMemberAsync(user);
+            }
+            catch (Exception)
+            {
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().WithContent($"Failed to unban {user.Username}.").AsEphemeral());
+                return;
+            }
+
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent($"Unbanned {user.Username}.").AsEphemeral());
         }
     }
 }
