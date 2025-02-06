@@ -152,14 +152,14 @@ namespace DiscordBot.Commands
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().WithContent($"Successfully banned {user.Username} for {duration} hours.").AsEphemeral());
 
-            Program.data.Users.bannedUsers.Enqueue((ctx.Guild.Id, user.Id, dm.Id, msg.Id), DateTime.Now.AddHours(duration));
+            Program.data.Users.bannedUsers.Enqueue(new(ctx.Guild.Id, user.Id, dm.Id, msg.Id), DateTime.Now.AddHours(duration));
             Console.WriteLine($"Banned {user.Username} for {duration} hours.");
         }
         public static async void UpdateBannedUsers(DiscordClient client)
         {
             while (true)
             {
-                if (!Program.data.Users.bannedUsers.TryPeek(out (ulong guildID, ulong userID, ulong channelID, ulong msgID) pair, out DateTime time)) // Break if there are no more users
+                if (!Program.data.Users.bannedUsers.TryPeek(out var info, out DateTime time)) // Break if there are no more users
                     break;
 
                 if (time - DateTime.Now > TimeSpan.Zero) // Break if there is time left
@@ -171,15 +171,15 @@ namespace DiscordBot.Commands
                 Program.data.Users.bannedUsers.Dequeue();
 
                 // Unban
-                DiscordGuild guild = await client.GetGuildAsync(pair.guildID);
-                await guild.UnbanMemberAsync(pair.userID);
+                DiscordGuild guild = await client.GetGuildAsync(info.guildID);
+                await guild.UnbanMemberAsync(info.userID);
 
-                DiscordUser user = await client.GetUserAsync(pair.userID);
+                DiscordUser user = await client.GetUserAsync(info.userID);
                 Console.WriteLine($"Unbanned {user.Username}.");
 
                 // Notify the user that he has been unbanned
-                var dm = await client.GetChannelAsync(pair.channelID);
-                var msg = await dm.GetMessageAsync(pair.msgID);
+                var dm = await client.GetChannelAsync(info.channelID);
+                var msg = await dm.GetMessageAsync(info.messageID);
                 await msg.ModifyAsync(new DiscordMessageBuilder()
                     .WithEmbed(new DiscordEmbedBuilder()
                         .WithTitle("Unban")

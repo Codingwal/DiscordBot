@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace DiscordBot
 {
@@ -27,7 +28,14 @@ namespace DiscordBot
                 string json = r.ReadToEnd();
                 try
                 {
-                    c.Users = JsonConvert.DeserializeObject<JSONUsers>(json);
+                    MemoryTraceWriter traceWriter = new();
+
+                    JsonSerializerSettings settings = new() { TraceWriter = traceWriter };
+                    settings.Converters.Add(new JsonBannedUsersConverter());
+
+                    c.Users = JsonConvert.DeserializeObject<JSONUsers>(json, settings);
+
+                    Console.WriteLine(traceWriter);
                 }
                 catch (JsonSerializationException e)
                 {
@@ -47,8 +55,15 @@ namespace DiscordBot
             }
             using (StreamWriter w = new("data/users.json"))
             {
-                string json = JsonConvert.SerializeObject(Users, Formatting.Indented);
+                MemoryTraceWriter traceWriter = new();
+
+                JsonSerializerSettings settings = new() { TraceWriter = traceWriter };
+                settings.Converters.Add(new JsonBannedUsersConverter());
+
+                string json = JsonConvert.SerializeObject(Users, Formatting.Indented, settings);
                 w.Write(json);
+
+                Console.WriteLine(traceWriter);
             }
         }
     }
@@ -67,11 +82,37 @@ namespace DiscordBot
     {
         public string token = "";
     }
-
-    internal sealed class JSONUsers
+    public class JsonBannedUsersConverter : JsonConverter<PriorityQueue<BannedUserInfo, DateTime>>
     {
-        public PriorityQueue<(ulong, ulong, ulong, ulong), DateTime> bannedUsers; // <(GuildID, UserID, ChannelID, MessageID), time>
+        public override PriorityQueue<BannedUserInfo, DateTime> ReadJson(JsonReader reader, Type objectType, PriorityQueue<BannedUserInfo, DateTime> existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            var list = (List<(BannedUserInfo, DateTime)>)serializer.Deserialize(reader, typeof(List<(BannedUserInfo, DateTime)>));
+            return new(list);
+        }
+        public override void WriteJson(JsonWriter writer, PriorityQueue<BannedUserInfo, DateTime> value, JsonSerializer serializer)
+        {
+            List<(BannedUserInfo, DateTime)> list = value.UnorderedItems.ToList();
+            serializer.Serialize(writer, list);
+        }
+    }
+    public sealed class JSONUsers
+    {
+        public PriorityQueue<BannedUserInfo, DateTime> bannedUsers = new(); // <(GuildID, UserID, ChannelID, MessageID), time>
         public Dictionary<ulong, JSONUser> users = new();
+    }
+    public struct BannedUserInfo
+    {
+        public ulong guildID;
+        public ulong userID;
+        public ulong channelID;
+        public ulong messageID;
+        public BannedUserInfo(ulong guildID, ulong userID, ulong channelID, ulong messageID)
+        {
+            this.guildID = guildID;
+            this.userID = userID;
+            this.channelID = channelID;
+            this.messageID = messageID;
+        }
     }
     public class JSONUser
     {
