@@ -5,6 +5,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.EventArgs;
 
@@ -31,6 +32,7 @@ namespace DiscordBot
             client.Ready += OnClientReady;
             client.MessageCreated += OnClientMessageCreated;
             client.ModalSubmitted += OnModalSubmitted;
+            client.ComponentInteractionCreated += OnComponentInteractionCreated;
 
             // Setup commands
             CommandsNextConfiguration commandsConfig = new()
@@ -57,6 +59,21 @@ namespace DiscordBot
                 await Task.Delay(data.Config.saveDataFrequency * 1000);
                 data.SaveData();
                 AdminCommands.UpdateBannedUsers(client);
+            }
+        }
+
+        private static async Task OnComponentInteractionCreated(DiscordClient sender, ComponentInteractionCreateEventArgs e)
+        {
+            string customId = e.Interaction.Data.CustomId;
+            if (customId.StartsWith("makesticky"))
+            {
+                string[] tokens = customId.Split('-');
+                ulong channelID = ulong.Parse(tokens[1]);
+                ulong msgID = ulong.Parse(tokens[2]);
+                data.data.stickyMessages.Add((channelID, msgID));
+
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                    .WithContent($"Made message sticky."));
             }
         }
 
@@ -104,14 +121,33 @@ namespace DiscordBot
             }
 
             // Handle swear words
-            string msg = e.Message.Content.ToLower();
-            foreach (var word in data.Config.bannedWords)
             {
-                if (msg.Contains(word))
+                string msg = e.Message.Content.ToLower();
+                foreach (var word in data.Config.bannedWords)
                 {
-                    Console.WriteLine($"Detected banned word \"{word}\" used by {e.Author.Username} (Deleted message)");
-                    await e.Message.DeleteAsync();
+                    if (msg.Contains(word))
+                    {
+                        Console.WriteLine($"Detected banned word \"{word}\" used by {e.Author.Username} (Deleted message)");
+                        await e.Message.DeleteAsync();
+                    }
                 }
+            }
+
+            // Handle sticky messages
+            for (int i = 0; i < data.data.stickyMessages.Count; i++)
+            {
+                if (e.Channel.Id != data.data.stickyMessages[i].Item1) // Item1 = channelId
+                    continue;
+
+                try
+                {
+                    var msg = await e.Channel.GetMessageAsync(data.data.stickyMessages[i].Item2); // Item2 = msgId
+                    var embed = new DiscordEmbedBuilder(msg.Embeds[0]);
+                    await msg.DeleteAsync();
+                    msg = await e.Channel.SendMessageAsync(embed);
+                    data.data.stickyMessages[i] = (e.Channel.Id, msg.Id); // Update msgId
+                }
+                catch (NotFoundException) { } // Message is probably already being moved
             }
         }
 

@@ -7,6 +7,7 @@ namespace DiscordBot
     {
         public string Token { get; private set; }
         public JSONConfig Config { get; set; }
+        public JSONData data;
         public JSONUsers Users { get; set; }
 
         public static Data GetData()
@@ -23,6 +24,11 @@ namespace DiscordBot
                 string json = r.ReadToEnd();
                 c.Token = JsonConvert.DeserializeObject<JSONToken>(json).token;
             }
+            using (StreamReader r = new("data/data.json"))
+            {
+                string json = r.ReadToEnd();
+                c.data = JsonConvert.DeserializeObject<JSONData>(json);
+            }
             using (StreamReader r = new("data/users.json"))
             {
                 string json = r.ReadToEnd();
@@ -37,11 +43,6 @@ namespace DiscordBot
         }
         public void SaveData()
         {
-            using (StreamWriter w = new("data/config.json"))
-            {
-                string json = JsonConvert.SerializeObject(Config, Formatting.Indented);
-                w.Write(json);
-            }
             using (StreamWriter w = new("data/users.json"))
             {
                 JsonSerializerSettings settings = new();
@@ -50,34 +51,49 @@ namespace DiscordBot
                 string json = JsonConvert.SerializeObject(Users, Formatting.Indented, settings);
                 w.Write(json);
             }
+            using (StreamWriter w = new("data/data.json"))
+            {
+                string json = JsonConvert.SerializeObject(data, Formatting.Indented);
+                w.Write(json);
+            }
         }
     }
 
+    // config.json
     internal sealed class JSONConfig
     {
         public string prefix = "";
         public int saveDataFrequency = 5;
         public List<string> bannedWords = new();
-        public string faq = "";
         public string privateMessageResponse = "";
         public string inviteLink = "";
     }
 
+    // token.json
     internal sealed class JSONToken
     {
         public string token = "";
     }
-    public sealed class JSONUsers
+
+    // data.json
+    internal sealed class JSONData
+    {
+        public string faq = "";
+        public List<(ulong, ulong)> stickyMessages = new(); // <(channelID, msgID)>
+    }
+
+    // users.json
+    internal sealed class JSONUsers
     {
         public PriorityQueue<BannedUserInfo, DateTime> bannedUsers = new(); // <(GuildID, UserID, ChannelID, MessageID), time>
         public Dictionary<ulong, JSONUser> users = new();
     }
     public struct BannedUserInfo
     {
-        public ulong guildID;
-        public ulong userID;
-        public ulong channelID;
-        public ulong messageID;
+        public ulong guildID = 0;
+        public ulong userID = 0;
+        public ulong channelID = 0;
+        public ulong messageID = 0;
         public BannedUserInfo(ulong guildID, ulong userID, ulong channelID, ulong messageID)
         {
             this.guildID = guildID;

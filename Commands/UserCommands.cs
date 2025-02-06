@@ -13,7 +13,7 @@ namespace DiscordBot.Commands
             var msg = new DiscordEmbedBuilder
             {
                 Title = "FAQ",
-                Description = Program.data.Config.faq,
+                Description = Program.data.data.faq,
                 Color = DiscordColor.Blue,
             };
             await ctx.CreateResponseAsync(msg);

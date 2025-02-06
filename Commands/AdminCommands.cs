@@ -30,7 +30,7 @@ namespace DiscordBot.Commands
             await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().WithContent($"{e.Interaction.User.Username} updated the faq."));
 
-            Program.data.Config.faq = content;
+            Program.data.data.faq = content;
         }
 
         // post
@@ -61,14 +61,21 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().WithContent($"{e.Interaction.User.Username} posted something in {channelName}."));
-
-            var msg = new DiscordEmbedBuilder()
+            // Send post
+            var msg = await channel.SendMessageAsync(new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Red)
                 .WithTitle(title)
-                .WithDescription(content);
-            await channel.SendMessageAsync(msg);
+                .WithDescription(content));
+
+            // Reply to command (with "Make post sticky" button)
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                .WithContent("Successfully created post.")
+                .AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, $"makesticky-{channel.Id}-{msg.Id}", "Make post sticky"))
+                .AsEphemeral());
+
+            // Notify all others in the admin-commands channel
+            await e.Interaction.Channel.SendMessageAsync(new DiscordMessageBuilder()
+                .WithContent($"{e.Interaction.User.Username} posted something in {channelName}."));
         }
 
         [SlashCommand("warn", "Warn a user because of bad behaviour")]
