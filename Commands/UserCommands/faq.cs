@@ -4,7 +4,7 @@ using DSharpPlus.SlashCommands.Attributes;
 
 namespace DiscordBot.Commands
 {
-    public class UserCommands : ApplicationCommandModule
+    public partial class UserCommands : ApplicationCommandModule
     {
         [SlashCommand("faq", "Prints the up-to-date version of the FAQ")]
         [SlashCooldown(2, 2 * 60, SlashCooldownBucketType.User)]

@@ -50,8 +50,6 @@ namespace DiscordBot
             slCommands.RegisterCommands<AdminCommands>();
             slCommands.SlashCommandErrored += OnSlashCommandErrored;
 
-            // Console.WriteLine(client.Intents.HasIntent(DiscordIntents.));
-
             // Start the bot and run it until the program gets stopped
             await client.ConnectAsync();
             while (true)
