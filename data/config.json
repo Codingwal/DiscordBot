@@ -8,5 +8,6 @@
     "bitch"
   ],
   "privateMessageResponse": "If you need help on the \"VeilMC - Minecraft Worldbuilding\" server, ask in the \"help\" channel. I am not able to help you. Sorry! :(",
-  "inviteLink": "https://discord.gg/MhQdhq9Q"
+  "inviteLink": "https://discord.gg/MhQdhq9Q",
+  "defaultRoleId": 1338871409115398268
 }

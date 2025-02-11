@@ -27,6 +27,7 @@ namespace DiscordBot
             client.MessageCreated += EventHandler.OnClientMessageCreated;
             client.ModalSubmitted += EventHandler.OnModalSubmitted;
             client.ComponentInteractionCreated += EventHandler.OnComponentInteractionCreated;
+            client.GuildMemberAdded += EventHandler.OnGuildMemberAdded;
 
             // Setup commands
             CommandsNextConfiguration commandsConfig = new()

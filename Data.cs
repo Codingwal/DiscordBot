@@ -67,6 +67,7 @@ namespace DiscordBot
         public List<string> bannedWords = new();
         public string privateMessageResponse = "";
         public string inviteLink = "";
+        public ulong defaultRoleId = 0;
     }
 
     // token.json

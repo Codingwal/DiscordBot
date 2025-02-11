@@ -100,5 +100,12 @@ namespace DiscordBot
         {
             return Task.CompletedTask;
         }
+
+        public static async Task OnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
+        {
+            // Grant default role
+            var role = args.Guild.GetRole(Program.data.Config.defaultRoleId);
+            await args.Member.GrantRoleAsync(role);
+        }
     }
 }
